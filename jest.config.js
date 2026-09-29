@@ -1,3 +1,6 @@
 module.exports = {
-  preset: '@react-native/jest-preset',
+  preset: 'jest-expo',
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+  testPathIgnorePatterns: ['/node_modules/', '/ios/', '/android/'],
+  collectCoverageFrom: ['src/**/*.{ts,tsx}', '!src/**/*.types.ts'],
 };

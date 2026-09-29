@@ -1,97 +1,131 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# FixIt
 
-# Getting Started
+FixIt is a production-structured Expo native application for discovering and booking trusted home-service professionals. It includes a complete mock customer journey, local artwork, simulated technician tracking, and checked-in Android and iOS projects.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## Requirements
 
-## Step 1: Start Metro
+- Node.js 22.13 or newer
+- npm
+- Android Studio with Android SDK 36 and JDK 17
+- Xcode and CocoaPods for iOS development
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+The project uses Expo SDK 57 and React Native 0.86.3. Use the committed `package-lock.json`; do not install Expo packages at arbitrary versions.
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+## Setup
 
 ```sh
-# Using npm
+npm install
+cp .env.example .env
+```
+
+Start the Expo development server:
+
+```sh
 npm start
-
-# OR using Yarn
-yarn start
 ```
 
-## Step 2: Build and run your app
-
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
-
-### Android
+Build and launch a native development app:
 
 ```sh
-# Using npm
 npm run android
-
-# OR using Yarn
-yarn android
+npm run ios
 ```
 
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+For iOS, install pods after the initial clone and whenever native dependencies change:
 
 ```sh
 bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
+cd ios
 bundle exec pod install
+cd ..
 ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+The Android Gradle wrapper uses `downloads.gradle.org` with a two-minute connection timeout to tolerate slower first-time downloads.
+
+## Demo authentication
+
+Enter a valid 10-digit Indian mobile number and tap **Continue** to open the verification screen. Any six-digit code is accepted and continues to Home.
+
+Authentication is explicitly labeled as a demo in the UI. Session tokens are stored with Expo SecureStore and are never logged or placed in AsyncStorage.
+
+## Environment
+
+Copy `.env.example` to `.env` and configure these public values:
+
+```text
+EXPO_PUBLIC_API_URL=https://api.example.com
+EXPO_PUBLIC_MOCK_MODE=true
+EXPO_PUBLIC_GOOGLE_MAPS_ANDROID_KEY=
+EXPO_PUBLIC_GOOGLE_MAPS_IOS_KEY=
+```
+
+`EXPO_PUBLIC_MOCK_MODE=true` uses the bundled service implementations and fixtures. Map keys are optional: tracking shows a polished route fallback when credentials are absent, and all tracking remains visibly marked as simulated.
+
+Public Expo variables are embedded in the client bundle. Never put secrets, private API keys, signing credentials, or server tokens in them.
+
+## Architecture
+
+```text
+app/                   Expo Router route files and navigation layouts
+src/components/        Reusable atoms, molecules, organisms, and templates
+src/features/          Feature screens grouped by customer journey
+src/hooks/             React Query keys and typed data hooks
+src/mocks/             Centralized mock fixture data
+src/providers/         Application and query providers
+src/services/          Service contracts, mock implementations, and Axios client
+src/store/             Zustand auth, booking draft, and preference stores
+src/theme/             Design tokens and shared component styling
+src/types/             Shared domain models
+src/utils/             Validation, formatting, and calculations
+assets/                Bundled icon, splash, and original technician artwork
+android/ and ios/      Retained Expo-enabled native projects
+```
+
+Expo Router owns navigation and typed parameters. React Query owns server-shaped catalog, booking, notification, and tracking data. Zustand is limited to the persisted session shell, booking draft, and non-sensitive UI preferences. React Hook Form and Zod handle form state and validation.
+
+Changing an earlier booking choice clears incompatible downstream choices. Logout removes secure credentials, clears the booking draft, and removes user-scoped query data.
+
+## Mock services and backend migration
+
+The app exposes replaceable `AuthService`, `CatalogService`, `BookingService`, `NotificationService`, and `TrackingService` contracts in `src/services/contracts.ts`. Mock implementations add simulated latency but return the same typed values expected from a backend.
+
+To connect a backend:
+
+1. Set `EXPO_PUBLIC_MOCK_MODE=false` and configure `EXPO_PUBLIC_API_URL`.
+2. Implement each contract using the shared Axios client in `src/services/api/client.ts`.
+3. Preserve the domain return types and normalized `AppError` shape.
+4. Keep token access in `src/services/storage.ts`; do not log authorization headers or tokens.
+5. Replace tracking snapshots with the real provider while retaining the offline and permission-denied fallback states.
+
+Payment, calls, and messages are intentionally simulated or delegated to explicit device actions. No real charge or automatic communication occurs.
+
+## Quality checks
 
 ```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
+npm run typecheck
+npm run lint
+npm run format
+npm test -- --runInBand
+npm run doctor
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+Native verification commands:
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+```sh
+cd android && NODE_ENV=development ./gradlew :app:assembleDebug --no-daemon
+cd ios && bundle exec pod install
+```
 
-## Step 3: Modify your app
+Tests cover validation, API error normalization, mock authentication, and booking-draft invalidation. The application also includes recoverable loading, error, empty, offline-style fallback, and missing-map-key states.
 
-Now that you have successfully run the app, let's make changes!
+## Assets
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+The technician hero is original, locally bundled artwork created for FixIt. Raster imagery is rendered with Expo Image, while interface icons use Lucide React Native. App icon and splash assets are local and require no runtime network access.
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+## App behavior
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+- Portrait-first layouts remain usable on larger phones and tablets.
+- English, INR pricing, one service region, and one demo customer are used for this proof of concept.
+- The native application identifier remains `com.fixit`.
+- Location and map credentials are optional and never block booking.
+- Tracking progress, ETA, and technician movement are simulations in mock mode.

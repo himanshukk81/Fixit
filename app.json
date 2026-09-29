@@ -1,4 +1,47 @@
 {
-  "name": "fixit",
-  "displayName": "fixit"
+  "expo": {
+    "name": "FixIt – Your Home Service Partner",
+    "slug": "fixit",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/app-icon.png",
+    "scheme": "fixit",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.fixit",
+      "icon": "./assets/app-icon.png",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "FixIt uses your location to show your service address and simulated technician route."
+      }
+    },
+    "android": {
+      "package": "com.fixit",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/splash-icon.png",
+        "backgroundColor": "#0B7DEA"
+      },
+      "permissions": ["ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION"]
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 176,
+          "resizeMode": "contain",
+          "backgroundColor": "#EAF3FF"
+        }
+      ],
+      "expo-secure-store",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Allow FixIt to use your location for service bookings and simulated tracking."
+        }
+      ]
+    ],
+    "experiments": { "typedRoutes": true }
+  }
 }
